@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Voting System - Login</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .card {
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        .card-header {
+            background-color: #ffffff;
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+        .login-tabs .nav-link {
+            color: #495057;
+            font-weight: 500;
+            padding: 15px 30px;
+        }
+        .login-tabs .nav-link.active {
+            color: #2a5298;
+            border-bottom: 3px solid #2a5298;
+        }
+        .btn-primary {
+            background-color: #2a5298;
+            border-color: #2a5298;
+            padding: 10px 20px;
+        }
+        .login-icon {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .login-icon i {
+            font-size: 60px;
+            color: #2a5298;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6 col-lg-5">
+                <div class="card">
+                    <div class="card-header">
+                        <ul class="nav nav-tabs login-tabs" id="loginTab" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="voter-tab" data-bs-toggle="tab" data-bs-target="#voter" type="button" role="tab">Voter</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="admin-tab" data-bs-toggle="tab" data-bs-target="#admin" type="button" role="tab">Admin</button>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="login-icon">
+                            <i class="fas fa-vote-yea"></i>
+                        </div>
+                        <h3 class="text-center mb-4">E-Voting System</h3>
+                        
+                        <div class="alert alert-danger d-none" id="loginAlert"></div>
+                        
+                        <div class="tab-content" id="loginTabContent">
+                            <!-- Voter Login -->
+                            <div class="tab-pane fade show active" id="voter" role="tabpanel">
+                                <form id="voterLoginForm">
+                                    <div class="mb-3">
+                                        <label for="voterEmail" class="form-label">Email</label>
+                                        <input type="email" class="form-control" id="voterEmail" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="voterPassword" class="form-label">Password</label>
+                                        <input type="password" class="form-control" id="voterPassword" required>
+                                    </div>
+                                    <div class="mb-3 form-check">
+                                        <input type="checkbox" class="form-check-input" id="rememberVoter">
+                                        <label class="form-check-label" for="rememberVoter">Remember me</label>
+                                    </div>
+                                    <div class="d-grid gap-2">
+                                        <button type="submit" class="btn btn-primary">Login</button>
+                                    </div>
+                                    <div class="text-center mt-3">
+                                        <a href="register.html" class="text-decoration-none">New voter? Register here</a>
+                                    </div>
+                                </form>
+                            </div>
+                            
+                            <!-- Admin Login -->
+                            <div class="tab-pane fade" id="admin" role="tabpanel">
+                                <form id="adminLoginForm">
+                                    <div class="mb-3">
+                                        <label for="adminEmail" class="form-label">Email</label>
+                                        <input type="email" class="form-control" id="adminEmail" value="admin@evoting.com" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="adminPassword" class="form-label">Password</label>
+                                        <input type="password" class="form-control" id="adminPassword" value="admin@123" required>
+                                    </div>
+                                    <div class="d-grid gap-2">
+                                        <button type="submit" class="btn btn-primary">Login as Admin</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const API_URL = 'http://localhost:3001/api';
+        const loginAlert = document.getElementById('loginAlert');
+        
+        // Helper function to show alerts
+        function showAlert(message, type = 'danger') {
+            loginAlert.textContent = message;
+            loginAlert.className = `alert alert-${type}`;
+            setTimeout(() => {
+                loginAlert.classList.add('d-none');
+            }, 5000);
+        }
+        
+        // Handle voter login
+        document.getElementById('voterLoginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            loginAlert.classList.add('d-none');
+            
+            const email = document.getElementById('voterEmail').value;
+            const password = document.getElementById('voterPassword').value;
+            
+            try {
+                console.log('Attempting voter login for:', email);
+                const response = await fetch(`${API_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const data = await response.json();
+                console.log('Login response:', data);
+                
+                if (!response.ok) {
+                    throw new Error(data.message || 'Login failed');
+                }
+                
+                // Store auth data
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('userRole', data.user.role);
+                localStorage.setItem('userData', JSON.stringify(data.user));
+                
+                // Redirect based on role
+                window.location.href = '/student-dashboard.html';
+                
+            } catch (error) {
+                console.error('Login error:', error);
+                showAlert(error.message || 'Login failed. Please check your credentials.');
+            }
+        });
+        
+        // Handle admin login
+        document.getElementById('adminLoginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            loginAlert.classList.add('d-none');
+            
+            const email = document.getElementById('adminEmail').value;
+            const password = document.getElementById('adminPassword').value;
+            
+            try {
+                console.log('Attempting admin login for:', email);
+                const response = await fetch(`${API_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ 
+                        email, 
+                        password,
+                        role: 'admin' 
+                    })
+                });
+                
+                const data = await response.json();
+                console.log('Admin login response:', data);
+                
+                if (!response.ok) {
+                    throw new Error(data.message || 'Admin login failed');
+                }
+                
+                // Check if user is admin
+                if (data.user.role !== 'admin') {
+                    throw new Error('You do not have administrator privileges');
+                }
+                
+                // Store auth data
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('userRole', 'admin');
+                localStorage.setItem('userData', JSON.stringify(data.user));
+                
+                // Redirect to admin dashboard
+                window.location.href = '/admin-dashboard.html';
+                
+            } catch (error) {
+                console.error('Admin login error:', error);
+                showAlert(error.message || 'Admin login failed. Please check your credentials.');
+            }
+        });
+    </script>
+</body>
+</html>

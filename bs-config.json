@@ -1,0 +1,13 @@
+{
+  "server": {
+    "baseDir": ["./src", "./build/contracts"],
+    "routes": {
+      "/vendor": "./node_modules"
+    }
+  },
+  "port": 3000,
+  "files": ["./src/**/*.{html,htm,css,js}"],
+  "watchOptions": {
+    "ignored": "node_modules"
+  }
+}
