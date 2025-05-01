@@ -2,7 +2,10 @@ services:
   - type: web
     name: blockchain-voting-backend
     env: node
-    buildCommand: npm install
+    buildCommand: |
+      npm install -g truffle
+      npm install
+      truffle compile
     startCommand: node server/server.js
     envVars:
       - key: NODE_ENV

@@ -7,7 +7,7 @@
     "test": "test"
   },
   "scripts": {
-    "postinstall": "truffle compile",
+    "postinstall": "npm install -g truffle && truffle compile",
     "start": "concurrently \"npm run start:server\" \"npm run start:client\"",
     "start:server": "node server/server.js",
     "start:client": "lite-server",
@@ -33,11 +33,11 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^7.4.0",
     "nodemailer": "^6.10.0",
+    "truffle": "^5.11.5",
     "web3": "^1.10.0"
   },
   "devDependencies": {
     "lite-server": "^2.6.1",
-    "nodemon": "^3.0.1",
-    "truffle": "^5.11.5"
+    "nodemon": "^3.0.1"
   }
 }
