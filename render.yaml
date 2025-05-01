@@ -15,4 +15,4 @@ services:
       - key: JWT_SECRET
         value: your-secure-jwt-secret
       - key: MONGODB_URI
-        value: mongodb://localhost:27017/voting_system
+        value: mongodb+srv://mdanas8200:<db_password>@voting-system.3limyzu.mongodb.net/voting_system?retryWrites=true&w=majority

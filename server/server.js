@@ -7,25 +7,27 @@ const votesRoutes = require('./routes/votes');
 const app = express();
 
 // Set default JWT secret
-process.env.JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+process.env.JWT_SECRET = process.env.JWT_SECRET || 'your-secure-jwt-secret';
 
-// Connect to MongoDB
-const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/evoting';
-mongoose.connect(mongoURI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
-const db = mongoose.connection;
-db.on('error', (error) => console.error('MongoDB connection error:', error));
-db.once('open', () => {
-  console.log('Connected to MongoDB');
-  
-  // Start server only after DB connection is open
-  const PORT = process.env.PORT || 3001;
-  app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-  });
-});
+// Connect to MongoDB Atlas with retry logic
+const connectWithRetry = async () => {
+  try {
+    await mongoose.connect(process.env.MONGODB_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 45000,
+    });
+    console.log('Connected to MongoDB Atlas successfully');
+  } catch (error) {
+    console.error('MongoDB Atlas connection error:', error);
+    console.log('Retrying connection in 5 seconds...');
+    setTimeout(connectWithRetry, 5000);
+  }
+};
+
+// Start MongoDB connection
+connectWithRetry();
 
 // Essential middleware 
 app.use(cors());
