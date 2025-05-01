@@ -12,6 +12,10 @@ process.env.JWT_SECRET = process.env.JWT_SECRET || 'your-secure-jwt-secret';
 // Connect to MongoDB Atlas with retry logic
 const connectWithRetry = async () => {
   try {
+    if (!process.env.MONGODB_URI) {
+      throw new Error('MONGODB_URI is not defined in environment variables');
+    }
+    
     await mongoose.connect(process.env.MONGODB_URI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
@@ -20,7 +24,7 @@ const connectWithRetry = async () => {
     });
     console.log('Connected to MongoDB Atlas successfully');
   } catch (error) {
-    console.error('MongoDB Atlas connection error:', error);
+    console.error('MongoDB Atlas connection error:', error.message);
     console.log('Retrying connection in 5 seconds...');
     setTimeout(connectWithRetry, 5000);
   }
@@ -121,4 +125,10 @@ app.get('*', (req, res) => {
 process.on('SIGTERM', () => {
   console.log('SIGTERM received, shutting down gracefully');
   process.exit(0);
+});
+
+// Start server
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });

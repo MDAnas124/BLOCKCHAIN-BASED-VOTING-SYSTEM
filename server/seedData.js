@@ -39,18 +39,20 @@ const elections = [
         description: 'Election for the position of Student Council President',
         startDate: new Date('2025-03-01'),
         endDate: new Date('2025-03-07'),
-        department: ['All'],
-        status: 'upcoming',
-        isActive: true
+        department: 'All',
+        status: 'pending',
+        voterEligibility: 'all',
+        allowSelfNomination: true
     },
     {
         title: 'Department Representative',
         description: 'Election for CSE Department Representative',
         startDate: new Date('2025-02-20'),
         endDate: new Date('2025-02-25'),
-        department: ['CSE'],
+        department: 'CSE',
         status: 'active',
-        isActive: true
+        voterEligibility: 'department',
+        allowSelfNomination: true
     }
 ];
 
@@ -108,6 +110,12 @@ async function seedDatabase() {
             console.log('Voters seeded successfully');
         }
 
+        // Get admin user for createdBy field
+        const adminUser = await Voter.findOne({ role: 'admin' });
+        if (!adminUser) {
+            throw new Error('Admin user not found');
+        }
+
         // Check if elections already exist
         const electionCount = await Election.countDocuments();
         if (electionCount > 0) {
@@ -117,8 +125,14 @@ async function seedDatabase() {
             await Election.deleteMany({});
             console.log('Cleared elections collection');
 
+            // Add createdBy to elections
+            const electionsWithAdmin = elections.map(election => ({
+                ...election,
+                createdBy: adminUser._id
+            }));
+
             // Insert elections
-            await Election.insertMany(elections);
+            await Election.insertMany(electionsWithAdmin);
             console.log('Elections seeded successfully');
         }
 
