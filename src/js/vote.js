@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Authenticate user
     try {
-        const response = await fetch('http://localhost:3001/api/auth/me', {
+        const response = await fetch(`${window.API_CONFIG.API_URL}/auth/me`, {
             headers: { 'Authorization': 'Bearer ' + token }
         });
         if (!response.ok) throw new Error('Authentication failed');
@@ -68,7 +68,7 @@ async function loadCandidates(electionId) {
     document.getElementById('candidateList').innerHTML = '<div class="text-center"><div class="spinner-border" role="status"></div><p>Loading candidates...</p></div>';
     try {
         const token = localStorage.getItem('token');
-        const response = await fetch('http://localhost:3001/api/elections/' + electionId, {
+        const response = await fetch(`${window.API_CONFIG.API_URL}/elections/${electionId}`, {
             headers: { 'Authorization': 'Bearer ' + token }
         });
 
@@ -140,7 +140,7 @@ function requestOtp() {
         return;
     }
 
-    fetch('http://localhost:3001/api/votes/request-otp', {
+    fetch(`${window.API_CONFIG.API_URL}/votes/request-otp`, {
         method: 'POST',
         headers: {
             'Authorization': 'Bearer ' + token,
@@ -219,7 +219,7 @@ async function castVote() {
 
         // Send vote details to backend
         const token = localStorage.getItem('token');
-        const response = await fetch('http://localhost:3001/api/votes/cast', {
+        const response = await fetch(`${window.API_CONFIG.API_URL}/votes/cast`, {
             method: 'POST',
             headers: {
                 'Authorization': 'Bearer ' + token,

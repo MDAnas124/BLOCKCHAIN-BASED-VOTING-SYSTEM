@@ -1,6 +1,6 @@
 // Constants
-const API_URL = 'http://localhost:3001/api';
-const TOKEN_KEY = 'token';
+const API_URL = window.API_CONFIG.API_URL;
+const TOKEN_KEY = window.API_CONFIG.TOKEN_KEY;
 
 // Utility to get query param
 function getQueryParam(param) {
