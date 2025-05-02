@@ -63,7 +63,7 @@ async function handleRegistration(event) {
         const signature = await web3.eth.personal.sign(message, walletAddress);
         formData.signature = signature;
 
-        const response = await fetch(`${window.API_CONFIG.API_URL}/auth/register`, {
+        const response = await fetch(`${window.API_CONFIG?.API_URL || window.API_CONFIG?.API_CONFIG?.API_URL || ''}/auth/register`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
