@@ -1,6 +1,6 @@
             // Constants
-const API_URL = window.API_CONFIG.API_URL;
-const TOKEN_KEY = window.API_CONFIG.TOKEN_KEY;
+const apiUrl = window.API_CONFIG && window.API_CONFIG.API_URL ? window.API_CONFIG.API_URL : '';
+const tokenKey = window.API_CONFIG && window.API_CONFIG.TOKEN_KEY ? window.API_CONFIG.TOKEN_KEY : 'token';
 
 // DOM Elements
 const statsElements = {
