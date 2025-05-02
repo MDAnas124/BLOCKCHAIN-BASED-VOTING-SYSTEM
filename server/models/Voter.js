@@ -17,11 +17,13 @@ const voterSchema = new mongoose.Schema({
         required: true,
         unique: true,
         trim: true,
-        lowercase: true
+        lowercase: true,
+        match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, 'Please enter a valid email']
     },
     password: {
         type: String,
-        required: true
+        required: true,
+        minlength: 6
     },
     studentId: {
         type: String,
@@ -79,16 +81,30 @@ const voterSchema = new mongoose.Schema({
 
 // Hash password before saving
 voterSchema.pre('save', async function(next) {
-    if (this.isModified('password')) {
-        this.password = await bcrypt.hash(this.password, 10);
+    if (!this.isModified('password')) return next();
+    
+    try {
+        const salt = await bcrypt.genSalt(10);
+        this.password = await bcrypt.hash(this.password, salt);
+        next();
+    } catch (error) {
+        next(error);
     }
-    next();
 });
 
 // Compare password method
 voterSchema.methods.comparePassword = async function(candidatePassword) {
-    return bcrypt.compare(candidatePassword, this.password);
+    try {
+        return await bcrypt.compare(candidatePassword, this.password);
+    } catch (error) {
+        throw error;
+    }
 };
+
+// Add index for faster queries
+voterSchema.index({ email: 1 });
+voterSchema.index({ studentId: 1 });
+voterSchema.index({ walletAddress: 1 });
 
 const Voter = mongoose.model('Voter', voterSchema);
 module.exports = Voter;

@@ -34,7 +34,12 @@ const connectWithRetry = async () => {
 connectWithRetry();
 
 // Essential middleware 
-app.use(cors());
+app.use(cors({
+    origin: ['https://blockchain-based-voting-system-u5lx.onrender.com', 'http://localhost:3000'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true
+}));
 app.use(express.json());
 app.use('/api/votes', votesRoutes);
 
@@ -129,6 +134,6 @@ process.on('SIGTERM', () => {
 
 // Start server
 const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on port ${PORT}`);
 });

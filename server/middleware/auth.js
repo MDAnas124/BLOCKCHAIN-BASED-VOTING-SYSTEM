@@ -11,6 +11,11 @@ module.exports = async (req, res, next) => {
     };
 
     try {
+        // Handle preflight requests
+        if (req.method === 'OPTIONS') {
+            return res.status(200).end();
+        }
+
         // Get token from header
         const authHeader = req.header('Authorization');
         if (!authHeader) {
@@ -23,7 +28,11 @@ module.exports = async (req, res, next) => {
         }
 
         // Get secret key
-        const secret = process.env.JWT_SECRET || 'your-secret-key';
+        const secret = process.env.JWT_SECRET;
+        if (!secret) {
+            console.error('JWT_SECRET is not defined');
+            return handleError(500, 'Server configuration error');
+        }
         
         // Verify token
         let decoded;
