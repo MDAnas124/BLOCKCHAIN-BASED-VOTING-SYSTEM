@@ -63,7 +63,8 @@ async function handleRegistration(event) {
         const signature = await web3.eth.personal.sign(message, walletAddress);
         formData.signature = signature;
 
-        const response = await fetch(`${window.API_CONFIG?.API_URL || window.API_CONFIG?.API_CONFIG?.API_URL || ''}/auth/register`, {
+        const apiUrl = window.API_CONFIG && window.API_CONFIG.API_URL ? window.API_CONFIG.API_URL : '';
+        const response = await fetch(`${apiUrl}/auth/register`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -71,7 +72,14 @@ async function handleRegistration(event) {
             body: JSON.stringify(formData)
         });
 
-        const data = await response.json();
+        let data;
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+            data = await response.json();
+        } else {
+            const text = await response.text();
+            throw new Error(`Unexpected response from server: ${text.substring(0, 100)}`);
+        }
 
         if (!response.ok) {
             throw new Error(data.message || 'Registration failed');

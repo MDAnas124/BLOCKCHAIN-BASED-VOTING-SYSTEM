@@ -1,5 +1,5 @@
-// API Configuration
-const API_URL = 'https://blockchain-based-voting-system-u5lx.onrender.com/api';
+// API Configuration from environment variables
+const API_URL = process.env.API_URL || 'https://blockchain-based-voting-system-u5lx.onrender.com/api';
 const TOKEN_KEY = 'token';
 
 // Make configuration available globally
