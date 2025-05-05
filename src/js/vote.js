@@ -3,7 +3,9 @@ let currentElection;
 let selectedCandidate;
 let candidateIdMap = {}; // Map from string _id to numeric contract candidateId (index)
 
-// Parse electionId from URL
+const apiUrlMeta = document.querySelector('meta[name="api-url"]');
+const API_URL = apiUrlMeta ? apiUrlMeta.getAttribute('content') : '';
+
 function getElectionId() {
     const params = new URLSearchParams(window.location.search);
     return params.get('electionId');
@@ -18,7 +20,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Authenticate user
     try {
-        const response = await fetch(`${window.API_CONFIG.API_URL}/auth/me`, {
+        const response = await fetch(`${API_URL}/auth/me`, {
             headers: { 'Authorization': 'Bearer ' + token }
         });
         if (!response.ok) throw new Error('Authentication failed');
@@ -55,20 +57,32 @@ document.addEventListener('DOMContentLoaded', async () => {
     loadCandidates(electionId);
 
     // Event listeners
-    document.getElementById('candidateList').addEventListener('change', (e) => {
-        if (e.target.type === 'radio') {
-            selectedCandidate = e.target.value;
-        }
-    });
-    document.getElementById('requestOtpBtn').addEventListener('click', requestOtp);
-    document.getElementById('submitVoteBtn').addEventListener('click', castVote);
+    const candidateListEl = document.getElementById('candidateList');
+    if (candidateListEl) {
+        candidateListEl.addEventListener('change', (e) => {
+            if (e.target.type === 'radio') {
+                selectedCandidate = e.target.value;
+            }
+        });
+    }
+    const requestOtpBtn = document.getElementById('requestOtpBtn');
+    if (requestOtpBtn) {
+        requestOtpBtn.addEventListener('click', requestOtp);
+    }
+    const submitVoteBtn = document.getElementById('submitVoteBtn');
+    if (submitVoteBtn) {
+        submitVoteBtn.addEventListener('click', castVote);
+    }
 });
 
 async function loadCandidates(electionId) {
-    document.getElementById('candidateList').innerHTML = '<div class="text-center"><div class="spinner-border" role="status"></div><p>Loading candidates...</p></div>';
+    const candidateListEl = document.getElementById('candidateList');
+    if (candidateListEl) {
+        candidateListEl.innerHTML = '<div class="text-center"><div class="spinner-border" role="status"></div><p>Loading candidates...</p></div>';
+    }
     try {
         const token = localStorage.getItem('token');
-        const response = await fetch(`${window.API_CONFIG.API_URL}/elections/${electionId}`, {
+        const response = await fetch(`${API_URL}/elections/${electionId}`, {
             headers: { 'Authorization': 'Bearer ' + token }
         });
 
@@ -85,15 +99,20 @@ async function loadCandidates(electionId) {
             return;
         }
 
-        document.getElementById('electionInfo').innerHTML = 
-            '<h4>' + (data.title || 'Election') + '</h4>' +
-            '<p class="text-muted">' + (data.description || '') + '</p>' +
-            '<p><small>Ends: ' + new Date(data.endDate).toLocaleString() + '</small></p>';
+        const electionInfoEl = document.getElementById('electionInfo');
+        if (electionInfoEl) {
+            electionInfoEl.innerHTML = 
+                '<h4>' + (data.title || 'Election') + '</h4>' +
+                '<p class="text-muted">' + (data.description || '') + '</p>' +
+                '<p><small>Ends: ' + new Date(data.endDate).toLocaleString() + '</small></p>';
+        }
 
         const candidates = Array.isArray(data.candidates) ? data.candidates : (Array.isArray(data) ? data : []);
         
         if (!candidates.length) {
-            document.getElementById('candidateList').innerHTML = '<div class="alert alert-warning">No candidates available for this election</div>';
+            if (candidateListEl) {
+                candidateListEl.innerHTML = '<div class="alert alert-warning">No candidates available for this election</div>';
+            }
             return;
         }
 
@@ -117,7 +136,9 @@ async function loadCandidates(electionId) {
                 '</label>';
         });
         candidatesHtml += '</div>';
-        document.getElementById('candidateList').innerHTML = candidatesHtml;
+        if (candidateListEl) {
+            candidateListEl.innerHTML = candidatesHtml;
+        }
     } catch (error) {
         console.error('Error loading candidates:', error);
         showError('Failed to load candidates');
@@ -125,11 +146,17 @@ async function loadCandidates(electionId) {
 }
 
 function showError(message) {
-    document.getElementById('voteStatus').innerHTML = '<div class="alert alert-danger">' + message + '</div>';
+    const voteStatusEl = document.getElementById('voteStatus');
+    if (voteStatusEl) {
+        voteStatusEl.innerHTML = '<div class="alert alert-danger">' + message + '</div>';
+    }
 }
 
 function showSuccess(message) {
-    document.getElementById('voteStatus').innerHTML = '<div class="alert alert-success">' + message + '</div>';
+    const voteStatusEl = document.getElementById('voteStatus');
+    if (voteStatusEl) {
+        voteStatusEl.innerHTML = '<div class="alert alert-success">' + message + '</div>';
+    }
 }
 
 function requestOtp() {
@@ -140,7 +167,7 @@ function requestOtp() {
         return;
     }
 
-    fetch(`${window.API_CONFIG.API_URL}/votes/request-otp`, {
+    fetch(`${API_URL}/votes/request-otp`, {
         method: 'POST',
         headers: {
             'Authorization': 'Bearer ' + token,
@@ -152,7 +179,10 @@ function requestOtp() {
     .then(data => {
         if (data.success) {
             showSuccess('OTP sent to your registered email/mobile.');
-            document.getElementById('otpSection').style.display = 'block';
+            const otpSection = document.getElementById('otpSection');
+            if (otpSection) {
+                otpSection.style.display = 'block';
+            }
         } else {
             showError('Failed to send OTP');
         }
@@ -168,7 +198,8 @@ async function castVote() {
         return;
     }
 
-    const otp = document.getElementById('otpInput').value.trim();
+    const otpInput = document.getElementById('otpInput');
+    const otp = otpInput ? otpInput.value.trim() : '';
     if (!otp) {
         showError('Please enter the OTP');
         return;
@@ -219,7 +250,7 @@ async function castVote() {
 
         // Send vote details to backend
         const token = localStorage.getItem('token');
-        const response = await fetch(`${window.API_CONFIG.API_URL}/votes/cast`, {
+        const response = await fetch(`${API_URL}/votes/cast`, {
             method: 'POST',
             headers: {
                 'Authorization': 'Bearer ' + token,
@@ -238,8 +269,13 @@ async function castVote() {
 
         if (data.success) {
             showSuccess('Your vote has been cast successfully!');
-            document.getElementById('otpSection').style.display = 'none';
-            document.getElementById('otpInput').value = '';
+            const otpSection = document.getElementById('otpSection');
+            if (otpSection) {
+                otpSection.style.display = 'none';
+            }
+            if (otpInput) {
+                otpInput.value = '';
+            }
         } else {
             showError(data.message || 'Failed to cast vote');
         }

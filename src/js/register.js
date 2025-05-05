@@ -29,8 +29,38 @@ async function connectWallet() {
 
 document.getElementById('connectWallet').addEventListener('click', connectWallet);
 
+// Helper function to make API requests with fallback
+async function makeApiRequest(url, options) {
+    try {
+        const response = await fetch(url, options);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return await response.json();
+    } catch (error) {
+        console.error('API request failed:', error);
+        // Try fallback URL if main URL failed
+        if (url.includes(window.API_CONFIG.API_URL)) {
+            const fallbackUrl = url.replace(window.API_CONFIG.API_URL, window.API_CONFIG.FALLBACK_API_URL);
+            console.log('Trying fallback URL:', fallbackUrl);
+            const fallbackResponse = await fetch(fallbackUrl, options);
+            if (!fallbackResponse.ok) {
+                throw new Error(`Fallback request failed! status: ${fallbackResponse.status}`);
+            }
+            return await fallbackResponse.json();
+        }
+        throw error;
+    }
+}
+
 async function handleRegistration(event) {
     event.preventDefault();
+
+    // Check if API_CONFIG is available
+    if (!window.API_CONFIG || !window.API_CONFIG.API_URL) {
+        showMessage('Configuration error: API settings not found. Please refresh the page.', true);
+        return;
+    }
 
     const password = document.getElementById('password').value;
     const confirmPassword = document.getElementById('confirmPassword').value;
@@ -63,27 +93,13 @@ async function handleRegistration(event) {
         const signature = await web3.eth.personal.sign(message, walletAddress);
         formData.signature = signature;
 
-        const apiUrl = window.API_CONFIG && window.API_CONFIG.API_URL ? window.API_CONFIG.API_URL : '';
-        const response = await fetch(`${apiUrl}/auth/register`, {
+        const data = await makeApiRequest(`${window.API_CONFIG.API_URL}/auth/register`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify(formData)
         });
-
-        let data;
-        const contentType = response.headers.get('content-type');
-        if (contentType && contentType.includes('application/json')) {
-            data = await response.json();
-        } else {
-            const text = await response.text();
-            throw new Error(`Unexpected response from server: ${text.substring(0, 100)}`);
-        }
-
-        if (!response.ok) {
-            throw new Error(data.message || 'Registration failed');
-        }
 
         showMessage('Registration successful!', false);
         setTimeout(() => {

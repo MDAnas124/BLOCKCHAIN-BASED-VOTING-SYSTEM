@@ -1,6 +1,7 @@
 // Constants
-const API_URL = window.API_CONFIG.API_URL;
-const TOKEN_KEY = window.API_CONFIG.TOKEN_KEY;
+const apiUrlMeta = document.querySelector('meta[name="api-url"]');
+const API_URL = apiUrlMeta ? apiUrlMeta.getAttribute('content') : '';
+const TOKEN_KEY = 'token';
 
 // Utility to get query param
 function getQueryParam(param) {
@@ -65,7 +66,11 @@ async function loadResults() {
         if (!response.ok) {
             const errorText = await response.text();
             console.error('API error response:', errorText);
-            showAlert(`Failed to load election details: ${response.status} ${response.statusText}`, 'danger');
+            if (response.status === 404) {
+                showAlert('Election not found. Please check the election ID.', 'danger');
+            } else {
+                showAlert(`Failed to load election details: ${response.status} ${response.statusText}`, 'danger');
+            }
             return;
         }
         const data = await response.json();
@@ -75,9 +80,13 @@ async function loadResults() {
             return;
         }
 
-        document.getElementById('electionTitle').textContent = `Results for: ${data.title}`;
+        const electionTitleEl = document.getElementById('electionTitle');
+        if (electionTitleEl) {
+            electionTitleEl.textContent = `Results for: ${data.title}`;
+        }
 
         const tbody = document.getElementById('resultsTableBody');
+        if (!tbody) return;
         tbody.innerHTML = '';
 
         if (data.candidates && data.candidates.length > 0) {
@@ -104,9 +113,12 @@ async function loadResults() {
 }
 
 // Back button handler
-document.getElementById('backBtn').addEventListener('click', () => {
-    window.location.href = 'admin-dashboard.html';
-});
+const backBtn = document.getElementById('backBtn');
+if (backBtn) {
+    backBtn.addEventListener('click', () => {
+        window.location.href = 'admin-dashboard.html';
+    });
+}
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {

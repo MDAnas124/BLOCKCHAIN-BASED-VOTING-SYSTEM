@@ -1,5 +1,6 @@
-const apiUrl = window.API_CONFIG && window.API_CONFIG.API_URL ? window.API_CONFIG.API_URL : '';
-const tokenKey = window.API_CONFIG && window.API_CONFIG.TOKEN_KEY ? window.API_CONFIG.TOKEN_KEY : 'token';
+const apiUrlMeta = document.querySelector('meta[name="api-url"]');
+const API_URL = apiUrlMeta ? apiUrlMeta.getAttribute('content') : '';
+const TOKEN_KEY = 'token';
 
 let web3;
 let currentElection;
@@ -668,28 +669,54 @@ async function handleLogout() {
     window.location.href = 'login.html';
 }
 
-// Setup Event Listeners
 function setupEventListeners() {
     // Connect wallet button
-    document.getElementById('connectWallet').addEventListener('click', initializeWeb3);
+    const connectWalletBtn = document.getElementById('connectWallet');
+    if (connectWalletBtn) {
+        connectWalletBtn.addEventListener('click', initializeWeb3);
+    }
 
     // Password change form
-    document.getElementById('passwordForm').addEventListener('submit', handlePasswordChange);
+    const passwordForm = document.getElementById('passwordForm');
+    if (passwordForm) {
+        passwordForm.addEventListener('submit', handlePasswordChange);
+    }
 
     // Voting modal
-    document.getElementById('candidateList').addEventListener('change', (e) => {
-        if (e.target.type === 'radio') {
-            selectedCandidate = e.target.value;
-        }
-    });
+    const candidateListEl = document.getElementById('candidateList');
+    if (candidateListEl) {
+        candidateListEl.addEventListener('change', (e) => {
+            if (e.target.type === 'radio') {
+                selectedCandidate = e.target.value;
+            }
+        });
+    }
 
-    document.getElementById('selectCandidateBtn').addEventListener('click', handleSelectCandidate);
-    document.getElementById('verifyOtpBtn').addEventListener('click', verifyOtp);
-    document.getElementById('confirmVoteBtn').addEventListener('click', castVote);
+    const selectCandidateBtn = document.getElementById('selectCandidateBtn');
+    if (selectCandidateBtn) {
+        selectCandidateBtn.addEventListener('click', handleSelectCandidate);
+    }
+
+    const verifyOtpBtn = document.getElementById('verifyOtpBtn');
+    if (verifyOtpBtn) {
+        verifyOtpBtn.addEventListener('click', verifyOtp);
+    }
+
+    const confirmVoteBtn = document.getElementById('confirmVoteBtn');
+    if (confirmVoteBtn) {
+        confirmVoteBtn.addEventListener('click', castVote);
+    }
     
     // Back buttons
-    document.getElementById('backToStep1Btn').addEventListener('click', () => showVotingStep(1));
-    document.getElementById('backToStep2Btn').addEventListener('click', () => showVotingStep(2));
+    const backToStep1Btn = document.getElementById('backToStep1Btn');
+    if (backToStep1Btn) {
+        backToStep1Btn.addEventListener('click', () => showVotingStep(1));
+    }
+
+    const backToStep2Btn = document.getElementById('backToStep2Btn');
+    if (backToStep2Btn) {
+        backToStep2Btn.addEventListener('click', () => showVotingStep(2));
+    }
 }
 
 // Handle password change

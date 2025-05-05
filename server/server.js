@@ -35,7 +35,12 @@ connectWithRetry();
 
 // Essential middleware 
 app.use(cors({
-    origin: ['https://blockchain-based-voting-system-u5lx.onrender.com', 'http://localhost:3000'],
+    origin: [
+        'https://blockchain-based-voting-system-d8sv.onrender.com',
+        'https://blockchain-based-voting-system-u5lx.onrender.com',
+        'http://localhost:3000',
+        'http://localhost:3001'
+    ],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true

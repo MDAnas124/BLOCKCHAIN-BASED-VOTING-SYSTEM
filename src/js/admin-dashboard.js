@@ -1,5 +1,8 @@
-            // Constants
-const apiUrl = process.env.API_URL
+// Constants
+const apiUrlMeta = document.querySelector('meta[name="api-url"]');
+const API_URL = apiUrlMeta ? apiUrlMeta.getAttribute('content') : '';
+const FALLBACK_API_URL = ''; // No fallback URL defined currently
+const TOKEN_KEY = 'token';
 
 // DOM Elements
 const statsElements = {

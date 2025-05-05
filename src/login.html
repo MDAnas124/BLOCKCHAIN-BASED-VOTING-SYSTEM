@@ -120,7 +120,15 @@
     
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="config.js"></script>
+    <script src="test-connection.js"></script>
     <script>
+        // Add test button to the page
+        const testButton = document.createElement('button');
+        testButton.className = 'btn btn-info position-fixed bottom-0 end-0 m-3';
+        testButton.textContent = 'Test Connection';
+        testButton.onclick = testServers;
+        document.body.appendChild(testButton);
+
         const loginAlert = document.getElementById('loginAlert');
         
         // Helper function to show alerts
@@ -130,6 +138,30 @@
             setTimeout(() => {
                 loginAlert.classList.add('d-none');
             }, 5000);
+        }
+        
+        // Helper function to make API requests with fallback
+        async function makeApiRequest(url, options) {
+            try {
+                const response = await fetch(url, options);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return await response.json();
+            } catch (error) {
+                console.error('API request failed:', error);
+                // Try fallback URL if main URL failed
+                if (url.includes(window.API_CONFIG.API_URL)) {
+                    const fallbackUrl = url.replace(window.API_CONFIG.API_URL, window.API_CONFIG.FALLBACK_API_URL);
+                    console.log('Trying fallback URL:', fallbackUrl);
+                    const fallbackResponse = await fetch(fallbackUrl, options);
+                    if (!fallbackResponse.ok) {
+                        throw new Error(`Fallback request failed! status: ${fallbackResponse.status}`);
+                    }
+                    return await fallbackResponse.json();
+                }
+                throw error;
+            }
         }
         
         // Handle voter login
@@ -142,7 +174,7 @@
             
             try {
                 console.log('Attempting voter login for:', email);
-                const response = await fetch(`${window.API_CONFIG.API_URL}/auth/login`, {
+                const data = await makeApiRequest(`${window.API_CONFIG.API_URL}/auth/login`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -150,12 +182,7 @@
                     body: JSON.stringify({ email, password })
                 });
                 
-                const data = await response.json();
                 console.log('Login response:', data);
-                
-                if (!response.ok) {
-                    throw new Error(data.message || 'Login failed');
-                }
                 
                 // Store auth data
                 localStorage.setItem('token', data.token);
@@ -167,7 +194,7 @@
                 
             } catch (error) {
                 console.error('Login error:', error);
-                showAlert(error.message || 'Login failed. Please check your credentials.');
+                showAlert(error.message || 'Login failed. Please check your credentials and try again.');
             }
         });
         
@@ -181,7 +208,7 @@
             
             try {
                 console.log('Attempting admin login for:', email);
-                const response = await fetch(`${window.API_CONFIG.API_URL}/auth/login`, {
+                const data = await makeApiRequest(`${window.API_CONFIG.API_URL}/auth/login`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -193,12 +220,7 @@
                     })
                 });
                 
-                const data = await response.json();
                 console.log('Admin login response:', data);
-                
-                if (!response.ok) {
-                    throw new Error(data.message || 'Admin login failed');
-                }
                 
                 // Check if user is admin
                 if (data.user.role !== 'admin') {
@@ -215,7 +237,7 @@
                 
             } catch (error) {
                 console.error('Admin login error:', error);
-                showAlert(error.message || 'Admin login failed. Please check your credentials.');
+                showAlert(error.message || 'Admin login failed. Please check your credentials and try again.');
             }
         });
     </script>
