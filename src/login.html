@@ -122,7 +122,7 @@
     <script src="config.js"></script>
     <script>
         const loginAlert = document.getElementById('loginAlert');
-        
+        require('dotenv').config();
         // Helper function to show alerts
         function showAlert(message, type = 'danger') {
             loginAlert.textContent = message;
@@ -142,7 +142,7 @@
             
             try {
                 console.log('Attempting voter login for:', email);
-                const response = await fetch(`${window.API_CONFIG.API_URL}/auth/login`, {
+                const response = await fetch(`${process.env.API_URL}/auth/login`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
