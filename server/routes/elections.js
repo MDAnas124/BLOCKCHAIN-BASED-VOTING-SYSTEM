@@ -78,9 +78,7 @@ router.get('/', auth, async (req, res) => {
         if (department) filter.department = department;
 
         // If student, only show elections for their department
-        if (req.user.role === 'student') {
-            filter.department = req.user.department;
-        }
+        
 
         const elections = await Election.find(filter)
             .populate('createdBy', 'firstName lastName email')
